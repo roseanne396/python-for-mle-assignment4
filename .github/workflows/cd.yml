@@ -63,21 +63,19 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.DO_SSH_KEY }}
 
-      - name: Deploy on Droplet
-        run: |
-          SSH_HOST="${{ secrets.DO_HOST }}"
-          SSH_USER="${{ secrets.DO_USER }}"
-          SSH_PORT="${{ secrets.DO_SSH_PORT || '22' }}"
-          IMAGE="${{ env.IMAGE }}"
+- name: Deploy on Droplet
+  run: |
+    SSH_HOST="${{ secrets.DO_HOST }}"
+    SSH_USER="${{ secrets.DO_USER }}"
+    SSH_PORT="${{ secrets.DO_SSH_PORT || '22' }}"
+    IMAGE="${{ env.IMAGE }}"
 
-          ssh -o StrictHostKeyChecking=no -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" <<EOF
-          set -e
-          sudo mkdir -p /opt/assignment_outputs
-          sudo chmod 777 /opt/assignment_outputs
-
-          sudo docker pull $IMAGE
-          sudo docker rm -f sayhi || true
-          sudo docker run --rm \
-            -v /opt/assignment_outputs:/app/data \
-            --name sayhi $IMAGE
-          EOF
+    ssh -o StrictHostKeyChecking=no -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" <<EOF
+    set -e
+    # Directory already exists; no sudo needed
+    docker pull $IMAGE
+    docker rm -f sayhi || true
+    docker run --rm \
+      -v /opt/assignment_outputs:/app/data \
+      --name sayhi $IMAGE
+    EOF
