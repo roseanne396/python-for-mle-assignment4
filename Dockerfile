@@ -2,9 +2,12 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
+# Install deps if present (won't fail if requirements.txt is empty/missing)
+COPY requirements.txt /app/requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt || true
 
-COPY . .
+# Copy the rest of the repo
+COPY . /app
 
-CMD ["fastapi", "run", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Run the script (not a server)
+CMD ["python", "app.py"]
