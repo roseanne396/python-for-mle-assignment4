@@ -3,7 +3,7 @@ from datetime import datetime
 
 # Please customize the following variables 
 USER_NAME = "annie"
-VERSION = "1.0.1"
+VERSION = "1.0.2"
 
 def say_hi(msg: str = " Hello from annie via CI/CD!", file_directory: str = "/app/data/") -> None:
     # Ensure output directory exists
