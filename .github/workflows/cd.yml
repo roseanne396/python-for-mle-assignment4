@@ -67,16 +67,14 @@ jobs:
         run: |
           SSH_HOST="${{ secrets.DO_HOST }}"
           SSH_USER="${{ secrets.DO_USER }}"
-          SSH_PORT="${{ secrets.DO_SSH_PORT }}"
-          if [ -z "$SSH_PORT" ]; then SSH_PORT=22; fi
+          SSH_PORT="${{ secrets.DO_SSH_PORT || '22' }}"
+          IMAGE="${{ env.IMAGE }}"
 
-          ssh -o StrictHostKeyChecking=no -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" <<'EOF'
+          ssh -o StrictHostKeyChecking=no -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" <<EOF
           set -e
-          # ensure output dir exists
           sudo mkdir -p /opt/assignment_outputs
           sudo chmod 777 /opt/assignment_outputs
 
-          # pull and run the new image
           sudo docker pull $IMAGE
           sudo docker rm -f sayhi || true
           sudo docker run --rm \
