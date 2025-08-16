@@ -1,0 +1,36 @@
+name: CI (main)
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install deps
+        run: |
+          pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install pytest mypy pylint
+
+      - name: Run tests
+        run: pytest -q
+
+      # Make type/lint non-blocking to keep things smooth
+      - name: Mypy (soft)
+        run: mypy app.py || true
+
+      - name: Pylint (soft)
+        run: pylint app.py || true
