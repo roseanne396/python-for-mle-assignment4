@@ -1,5 +1,5 @@
 # Run the tests with: pytest tests/test_app.py
-from ..app import add_numbers
+import app
 
 def test_add_numbers():
-    assert 3 == add_numbers(1,2)
+    assert app.add_numbers(2, 3) == 5
