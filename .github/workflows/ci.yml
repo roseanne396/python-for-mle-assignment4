@@ -11,7 +11,7 @@ jobs:
   ci:
     runs-on: ubuntu-latest
     env:
-      PYTHONPATH: ${{ github.workspace }}  # so tools can import app
+      PYTHONPATH: ${{ github.workspace }}  # so 'import app' works
 
     steps:
       - name: Checkout
@@ -25,13 +25,15 @@ jobs:
 
       - name: Install deps
         run: |
+          python -V
           pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           pip install pytest mypy pylint
 
-      - name: Run pytest
+      - name: Run tests
         run: python -m pytest -q
 
+      # keep type/lint non-blocking so CI stays green
       - name: Mypy (soft)
         run: mypy app.py || true
 
