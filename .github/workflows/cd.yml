@@ -40,6 +40,12 @@ jobs:
       - name: Pylint (soft, app only)
         run: pylint app.py || true
 
+      # Helpful: see exactly which app.py is being built
+      - name: Show app.py we are building
+        run: |
+          echo "==== app.py (prod branch) ===="
+          sed -n '1,120p' app.py
+
       # Build & push Docker image to Docker Hub
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -58,26 +64,25 @@ jobs:
           tags: ${{ env.IMAGE }}
           no-cache: true
 
-
-      # SSH to droplet and run the container
+      # SSH to droplet and run the container (no sudo needed in your case)
       - name: Add SSH key
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.DO_SSH_KEY }}
 
-- name: Deploy on Droplet
-  run: |
-    SSH_HOST="${{ secrets.DO_HOST }}"
-    SSH_USER="${{ secrets.DO_USER }}"
-    SSH_PORT="${{ secrets.DO_SSH_PORT || '22' }}"
-    IMAGE="${{ env.IMAGE }}"
+      - name: Deploy on Droplet
+        run: |
+          SSH_HOST="${{ secrets.DO_HOST }}"
+          SSH_USER="${{ secrets.DO_USER }}"
+          SSH_PORT="${{ secrets.DO_SSH_PORT }}"
+          IMAGE="${{ env.IMAGE }}"
+          if [ -z "$SSH_PORT" ]; then SSH_PORT=22; fi
 
-    ssh -o StrictHostKeyChecking=no -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" <<EOF
-    set -e
-    # Directory already exists; no sudo needed
-    docker pull $IMAGE
-    docker rm -f sayhi || true
-    docker run --rm \
-      -v /opt/assignment_outputs:/app/data \
-      --name sayhi $IMAGE
-    EOF
+          ssh -o StrictHostKeyChecking=no -p "$SSH_PORT" "$SSH_USER@$SSH_HOST" <<EOF
+          set -e
+          docker pull $IMAGE
+          docker rm -f sayhi || true
+          docker run --rm \
+            -v /opt/assignment_outputs:/app/data \
+            --name sayhi $IMAGE
+EOF
