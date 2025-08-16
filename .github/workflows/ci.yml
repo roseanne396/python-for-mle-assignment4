@@ -2,13 +2,17 @@ name: CI (main)
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
+  workflow_dispatch:
 
 jobs:
   ci:
     runs-on: ubuntu-latest
+    env:
+      PYTHONPATH: ${{ github.workspace }}  # so tools can import app
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -25,12 +29,11 @@ jobs:
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           pip install pytest mypy pylint
 
-      - name: Run tests
-        run: pytest -q
+      - name: Run pytest
+        run: python -m pytest -q
 
-      # Make type/lint non-blocking to keep things smooth
       - name: Mypy (soft)
         run: mypy app.py || true
 
-      - name: Pylint (soft)
+      - name: Pylint (soft, app only)
         run: pylint app.py || true
