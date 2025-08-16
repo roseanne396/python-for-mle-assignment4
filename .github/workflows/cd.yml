@@ -56,6 +56,8 @@ jobs:
           context: .
           push: true
           tags: ${{ env.IMAGE }}
+          no-cache: true
+
 
       # SSH to droplet and run the container
       - name: Add SSH key
